@@ -9,6 +9,13 @@ You can download https://github.com/arifonursen/DjangoAdminSample.git and instal
 Quick start
 -----------
 
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/login.png)
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/dashboard1.png)
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/dashboard2.png)
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/dashboard3.png)
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/datefield.png)
+![alt text](https://raw.githubusercontent.com/arifonursen/django_modern_admin/master/recent.png)
+
 1. You can install with `pip install django_modern_admin`.Add “django_modern_admin” to your INSTALLED_APPS setting like this:
 
     INSTALLED_APPS = [
