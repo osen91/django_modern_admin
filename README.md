@@ -37,6 +37,22 @@ Quick start
 	```
 
 5. If you want to use charts you should set chart model and field in settings.py
+	Menu Model Icons:
+	```
+	# ApplicationName_icon
+	APP_ICONS = {
+	    'Orders_icon': 'mdi-action-assessment',
+	    'Products_icon': 'mdi-image-wb-incandescent',
+	    'auth_icon': 'mdi-hardware-security',
+	}
+	# ModelName_icon
+	MODEL_ICONS = {
+	    'Orders_icon': 'mdi-action-class',
+	    'Products_icon': 'mdi-image-filter-1',
+	    'Group_icon': 'mdi-file-folder-shared',
+	}
+	```
+	
 	For Top Left Line Chart:
 	```
 	TOP_LEFT_CHART = {
