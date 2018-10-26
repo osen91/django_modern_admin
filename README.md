@@ -4,7 +4,7 @@ django_modern_admin
 DjangoModernAdmin is a materialize Django admin extension to for your web apps. 
 With DjangoModernAdmin your dashboard will be more powerful and awesome.
 
-You can download 'https and install requirements for test sample.
+You can download https://github.com/arifonursen/DjangoAdminSample.git and install requirements for test sample.
 
 Quick start
 -----------
