@@ -128,17 +128,17 @@ Quick start
 	
 	Site Title:
 	```
-	SITE_TITLE = ‘Django Modern Admin Administration’
+	SITE_TITLE = ‘Django Modern Admin Administration’ # optional
 	```
 	
 	Site Header:
 	```
-	SITE_HEADER = ‘Django Modern Admin Header’
+	SITE_HEADER = ‘Django Modern Admin Header’ # optional
 	```
 	
 	Index Title:
 	```
-	INDEX_TITLE = ‘Django Modern Admin Index’
+	INDEX_TITLE = ‘Django Modern Admin Index’ # optional
 	```
 
 6. Visit http://127.0.0.1:8000/admin/ to see the magic.
