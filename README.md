@@ -37,7 +37,14 @@ Quick start
 	```
 
 5. If you want to use charts you should set chart model and field in settings.py
-	
+
+	Middleware:
+	```
+	MIDDLEWARE = [
+	    '... ',
+	    'django_modern_admin.users_middleware.OnlineNowMiddleware'
+	]
+	```
 	Menu Model Icons:
 	```
 	# ApplicationName_icon
