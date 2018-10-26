@@ -5,8 +5,7 @@ Summary: A materialize design Django admin app to make your dashboard awesome.
 Home-page: UNKNOWN
 Author: Arif Onur SEN
 Author-email: arifonursen@3goz.com
-License: GNU License
-Description-Content-Type: UNKNOWN
+License: GPLv3+
 Description: ===================
         django_modern_admin
         ===================
@@ -121,7 +120,7 @@ Classifier: Environment :: Web Environment
 Classifier: Framework :: Django
 Classifier: Framework :: Django :: 2.0
 Classifier: Intended Audience :: Developers
-Classifier: License :: OSI Approved :: GNU License
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3.5
