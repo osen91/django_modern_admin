@@ -37,6 +37,7 @@ Quick start
 	```
 
 5. If you want to use charts you should set chart model and field in settings.py
+	
 	Menu Model Icons:
 	```
 	# ApplicationName_icon
