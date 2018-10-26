@@ -99,8 +99,9 @@ Quick start
 	```
 	
 	For jVectorMap:
-
+	```
 	VECTOR_MAP_JS_URL = '/static/js/plugins/jvectormap/jvector-turkey.js'
+	```
 
 	For Left and Right Model List:
 	```
