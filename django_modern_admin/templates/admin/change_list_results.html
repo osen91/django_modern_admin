@@ -1,0 +1,53 @@
+{% load i18n static admin_list %}
+{% if result_hidden_fields %}
+    <div class="hiddenfields">
+        {% for item in result_hidden_fields %}{{ item }}{% endfor %}
+    </div>
+{% endif %}
+{% if results %}
+    <div id="table-datatables">
+        <div class="row">
+            <div class="col s12 m9 l9">
+                <table id="data-table-simple" class="striped responsive-table" cellspacing="0">
+                    <thead>
+                    <tr>
+                        {% for header in result_headers %}
+                            <th scope="col" {{ header.class_attrib }}>
+                                {% if header.sortable %}
+                                    {% if header.sort_priority > 0 %}
+                                    {% endif %}
+                                {% endif %}
+                                <div class="text">
+                                    {% if header.sortable %}<a href="{{ header.url_primary }}">{{ header.text|capfirst }}</a>{% else %}
+                                    <span>{{ header.text|capfirst }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="clear"></div>
+                            </th>{% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in results %}
+                        {% if result.form.non_field_errors %}
+                            <tr>
+                                <td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td>
+                            </tr>
+                        {% endif %}
+                        <tr class="{% cycle 'row1' 'row2' %}">{% for item in result %}{{ item }}{% endfor %}</tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col s12 m3 l3">
+                {% block filters %}
+                    {% if cl.has_filters %}
+                        <div class="card-panel">
+                            <h4>{% trans 'Filter' %}</h4>
+                            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endif %}

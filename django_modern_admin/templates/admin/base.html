@@ -1,0 +1,193 @@
+{% load i18n static %}
+{#{% if not is_popup %}#}
+<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+<title>{% block title %}{% endblock %}</title>
+<link href="{% static 'django_modern_admin/css/materialize.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<link href="{% static 'django_modern_admin/css/style.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<link href="{% static 'django_modern_admin/css/prism.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<link href="{% static 'django_modern_admin/js/plugins/perfect-scrollbar/perfect-scrollbar.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<link href="{% static 'django_modern_admin/js/plugins/chartist-js/chartist.min.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<link href="{% static 'django_modern_admin/js/plugins/jvectormap/jquery-jvectormap.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+<script type="text/javascript" src="{% static 'django_modern_admin/js/jquery-1.11.2.min.js' %}"></script>
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+{% block extrastyle %}{% endblock %}
+{% block extrahead %}{% endblock %}
+{% block responsive %}
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive.css" %}" />
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% static "admin/css/responsive_rtl.css" %}" />{% endif %}
+{% endblock %}
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+</head>
+{#{% endif %}#}
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+  data-admin-utc-offset="{% now "Z" %}">
+{% block loader %}{% endblock %}
+{% block mainsection %}
+<div id="container">
+{% block nav-global %}
+    {% if not is_popup %}
+    <header id="header" class="page-topbar">
+        <div class="navbar-fixed">
+            <nav class="white">
+                <div class="nav-wrapper">
+                {% block branding %}{% endblock %}
+                {% block usertools %}
+                {% if has_permission %}
+                    {% block userlinks %}
+                        <ul class="right hide-on-med-and-down">
+                            <li>
+                                <a href="javascript:void(0);" class="waves-effect waves-block waves-light toggle-fullscreen">
+                                    <i class="mdi-action-settings-overscan black-text"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-activates="chat-out" class="waves-effect waves-block waves-light chat-collapse">
+                                    <i class="mdi-social-whatshot black-text"></i>
+                                </a>
+                            </li>
+                            {% if site_url %}
+                            <li>
+                                <a target="_blank" href="{{ site_url }}" class="waves-effect waves-block waves-light">
+                                    <i class="mdi-content-link black-text"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if user.has_usable_password %}
+                                <li>
+                                    <a href="{% url 'admin:password_change' %}" class="waves-effect waves-block waves-light">
+                                        <i class="mdi-communication-vpn-key black-text"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li>
+                                <a href="{% url 'admin:logoutNGoLogin' %}" class="waves-effect waves-block waves-light">
+                                    <i class="mdi-action-settings-power black-text"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    {% endblock %}
+                {% endif %}
+                {% endblock %}
+
+                </div>
+            </nav>
+        </div>
+    </header>
+    {% endif %}
+{% endblock %}
+
+    <div id="main">
+        <div class="wrapper">
+        {% block wrapper %}
+            {% if not is_popup %}
+                {% block sidebar_left %}
+                    {% include 'admin/sidebar_left.html' %}
+                {% endblock %}
+            {% endif %}
+            <section id="content" class="{% block coltype %}colM{% endblock %}">
+                {% if not is_popup %}
+                    {% block breadcrumbs %}
+                        <div id="breadcrumbs-wrapper" class=" grey lighten-3">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col s12 m12 l12">
+                                    {% block breadcrumbs_content %}
+                                        <h5 class="breadcrumbs-title">{% if title %} &rsaquo; {{ title }}{% endif %}</h5>
+                                        <ol class="breadcrumb">
+                                            <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+                                        </ol>
+                                    {% endblock %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endblock %}
+                {% endif %}
+                <div class="container">
+                    <div class="section">
+                        {% block pretitle %}{% endblock %}
+                        {% block content %}
+                        {% block object-tools %}{% endblock %}
+                        {{ content }}
+                        {% endblock %}
+                        <br class="clear" />
+                    </div>
+                </div>
+            </section>
+            {% block sidebar_right %}
+                {% include 'admin/sidebar_right.html' %}
+            {% endblock %}
+        {% endblock %}
+        </div>
+    </div>
+    {% if not is_popup %}
+    {% block footer %}
+        <footer class="page-footer">
+            {% block footerMap %}{% endblock %}
+            <div class="footer-copyright white black-text">
+                <div class="container">
+                    <span>
+                        Copyright © {{ footerCopyRight }}
+                        Tüm hakları saklıdır.
+                    </span>
+                    <span class="right"> Developed by <a target="_blank" class="black-text text-lighten-4" href="http://3goz.com/">3.GOZ MEDIA</a></span>
+                </div>
+            </div>
+        </footer>
+    {% endblock %}
+    {% endif %}
+</div>
+{% endblock %}
+{#{% if not is_popup %}#}
+<script type="text/javascript" src="{% static 'django_modern_admin/js/materialize.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/prism.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/pickadate/picker.js' %}"></script>
+{#<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/pickadate/picker.date.js' %}"></script>#}
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/pickadate/picker.time.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/perfect-scrollbar/perfect-scrollbar.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/chartist-js/chartist.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/chartjs/chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/sparkline/jquery.sparkline.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script>
+    (function (w, d, s, g, js, fs) {
+        g = w.gapi || (w.gapi = {});
+        g.analytics = {
+            q: [], ready: function (f) {
+                this.q.push(f);
+            }
+        };
+        js = d.createElement(s);
+        fs = d.getElementsByTagName(s)[0];
+        js.src = 'https://apis.google.com/js/platform.js';
+        fs.parentNode.insertBefore(js, fs);
+        js.onload = function () {
+            g.load('analytics');
+        };
+    }(window, document, 'script'));
+</script>
+{% if vectorMapJsURL %}
+    <script type="application/javascript" src="{{ vectorMapJsURL }}"></script>
+{% endif %}
+<script type="text/javascript" src="{% static 'django_modern_admin/js/plugins.js' %}"></script>
+{% block extrascript %}{% endblock %}
+{% block messages %}
+    {% if messages %}
+        <script type="text/javascript">
+            // Toast Notification
+            $(window).load(function() {
+                {% for message in messages %}
+                    Materialize.toast('{{ message|capfirst }}', 5000);
+                {% endfor %}
+            });
+        </script>
+    {% endif %}
+{% endblock messages %}
+{#{% endif %}#}
+</body>
+</html>

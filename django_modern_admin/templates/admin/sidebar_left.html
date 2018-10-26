@@ -1,0 +1,63 @@
+{% load i18n static extraTags %}
+<aside id="left-sidebar-nav">
+    <ul id="slide-out" class="side-nav fixed leftside-navigation" style="min-height: 100vh;">
+        <li class="user-details cyan darken-2" style="background: url({% static 'django_modern_admin/images/blue-bg.jpg' %}) no-repeat center center;">
+            <div class="row">
+                <div class="col col s6 m6 l6 offset-l3 offset-m3 offset-s3">
+                    {% if request.user.adminprofile.avatar %}
+                    <img src="{{ request.user.adminprofile.avatar.url }}" alt="" class="circle responsive-img valign profile-image">
+                    {% else %}
+                    <img src="{% static 'django_modern_admin/images/avatar.jpg' %}" alt="" class="circle responsive-img valign profile-image">
+                    {% endif %}
+                </div>
+                <div class="col col s12 m12 l12">
+                    <ul id="profile-dropdown" class="dropdown-content">
+                        <li>
+                            <a href="{% url 'admin:lockAccount' %}"><i class="mdi-action-lock-outline"></i> {% trans 'Lock' %}</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{% url 'admin:logoutNGoLogin' %}"><i class="mdi-action-settings-power"></i> {% trans 'Log out' %}</a>
+                        </li>
+                    </ul>
+                    <a class="btn-flat dropdown-button waves-effect waves-light white-text profile-btn" data-activates="profile-dropdown">
+                        {{ request.user.get_full_name }}
+                        <i class="mdi-navigation-arrow-drop-down right"></i>
+                    </a>
+                    {% if request.user.groups.all|first %}
+                    <p class="user-roal">{{ request.user.groups.all|first }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </li>
+        <li class="bold">
+            <a href="{% url 'admin:index' %}" class="waves-effect waves-cyan"><i class="mdi-action-dashboard"></i>
+                {% trans 'Dashboard' %}
+            </a>
+        </li>
+        <li class="no-padding">
+            <ul class="collapsible collapsible-accordion">
+            {% get_menu as app_list %}
+            {% if app_list %}
+                {% for app in app_list %}
+                    <li class="bold"><a class="collapsible-header waves-effect waves-cyan">
+                        <i class="{{ app.icon }}"></i>{{ app.name|truncatechars:25 }}
+                    </a>
+                        <div class="collapsible-body">
+                            <ul>
+                                {% for model in app.models %}
+                                    <li>
+                                        <a style="left: -30px; position: relative;" {% if model.admin_url %}href="{{ model.admin_url }}"{% endif %}>
+                                            <i class="{{ model.icon }}"></i>{{ model.name|truncatechars:15 }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% endif %}
+            </ul>
+        </li>
+    </ul>
+</aside>

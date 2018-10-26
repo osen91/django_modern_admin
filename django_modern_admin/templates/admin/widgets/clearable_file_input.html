@@ -1,0 +1,22 @@
+{% if widget.is_initial %}
+    <p class="file-upload">{{ widget.initial_text }}:
+        <a href="{{ widget.value.url }}">{{ widget.value }}</a>
+    {% if not widget.required %}
+        <span class="clearable-file-input">
+        <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}" />
+        <label for="{{ widget.checkbox_id }}">{{ widget.clear_checkbox_label }}</label></span>
+    {% endif %}<br />
+    {{ widget.input_text }}:
+{% endif %}
+<div id="input-file-input" class="section">
+    <div class="file-field input-field">
+    <input class="file-path validate" style="width: 80%; float: right;" type="text"/>
+        <div class="btn">
+            <span>Dosya Seç</span>
+            <input type="file" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}/>
+        </div>
+    </div>
+</div>
+{% if widget.is_initial %}
+    </p>
+{% endif %}

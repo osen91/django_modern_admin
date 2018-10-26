@@ -1,0 +1,53 @@
+{% load i18n static %}
+<div class="row">
+    <div class="related-widget-wrapper col s12 m12 l12">
+        {{ rendered_widget }}
+        {% block links %}
+            {% spaceless %}
+                {% if can_change_related %}
+                    <a class="related-widget-wrapper-link change-related hidden" id="change_id_{{ name }}"
+                       data-href-template="{{ change_related_template_url }}?{{ url_params }}"
+                       title="{% blocktrans %}Change selected {{ model }}{% endblocktrans %}">
+                    </a>
+                    <a class="btn orange white-text col" style="padding: 5px; margin: 3px;"
+                       onclick="addOrChangeRelated($('#change_id_{{ name }}').attr('href'), '{{ model }}');"
+                       title="{% blocktrans %}Change selected {{ model }}{% endblocktrans %}">
+                        <span class="mdi-image-edit"></span>
+                    </a>
+                {% endif %}
+                {% if can_add_related %}
+                    <a class="btn green white-text green col" id="add_id_{{ name }}" style="padding: 5px; margin: 3px;"
+                       onclick="addOrChangeRelated('{{ add_related_url }}?{{ url_params }}', '{{ model }}')"
+                       title="{% blocktrans %}Add another {{ model }}{% endblocktrans %}">
+                        <span class="mdi-content-add"></span>
+                    </a>
+                {% endif %}
+                {% if can_delete_related %}
+                    <a class="related-widget-wrapper-link delete-related hidden" hidden id="delete_id_{{ name }}"
+                       data-href-template="{{ delete_related_template_url }}?{{ url_params }}"
+                       title="{% blocktrans %}Delete selected {{ model }}{% endblocktrans %}">
+                    </a>
+                    <a class="btn red white-text col" id="delete_new_id_{{ name }}" style="padding: 5px; margin: 3px;"
+                       onclick="addOrChangeRelated($('#delete_id_{{ name }}').attr('href'), '{{ model }}');"
+                       title="{% blocktrans %}Delete selected {{ model }}{% endblocktrans %}">
+                        <span class="mdi-action-delete"></span>
+                    </a>
+
+                {% endif %}
+            {% endspaceless %}
+        {% endblock %}
+    </div>
+</div>
+<div class="sidenav" id="addOrChangeSideNav"></div>
+<script>
+    function addOrChangeRelated(url, name) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (response) {
+                $('#addOrChangeSideNav').html(response).find('form').attr('action', url);
+                document.getElementById("addOrChangeSideNav").style.width = "100%";
+            }
+        })
+    }
+</script>

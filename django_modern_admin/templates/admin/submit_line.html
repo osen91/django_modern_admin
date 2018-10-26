@@ -1,0 +1,39 @@
+{% load i18n admin_urls %}
+<div class="row">
+    <div class="col s12 m12 l12" style="margin-top: 20px;">
+        <div class="left">
+            {% if show_delete_link %}
+                {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+                <a href="{% add_preserved_filters delete_url %}" class="waves-effect waves-light btn red">{% trans "Delete" %}</a>
+            {% endif %}
+            {% if is_popup %}
+                <button type="button" class="waves-effect waves-light btn red" onclick="closeNav()">{% trans 'Close' %}</button>
+            {% endif %}
+        </div>
+        <div class="right">
+            {% if is_popup %}
+                <button type="button" id="popup_save" class="waves-effect waves-light btn green" name="_save">{% trans 'Save' %}</button>
+            {% endif %}
+            {% if show_save and not is_popup %}
+                <button type="submit" class="waves-effect waves-light btn green" name="_save">{% trans 'Save' %}</button>
+            {% endif %}
+            {% if show_save_as_new %}
+                <button type="submit" class="waves-effect waves-light btn green" name="_saveasnew">{% trans 'Save as new' %}</button>
+            {% endif %}
+            {% if show_save_and_add_another %}
+                <button type="submit" class="waves-effect waves-light btn orange" name="_addanother">{% trans 'Save and add another' %}</button>
+            {% endif %}
+            {% if show_save_and_continue %}
+                <button type="submit" class="waves-effect waves-light btn blue" name="_continue">{% trans 'Save and continue editing' %}</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    function closeNav() {
+        document.getElementById("addOrChangeSideNav").style.width = "0";
+        setTimeout(function () {
+            window.location.reload();
+        }, 1000);
+    }
+</script>

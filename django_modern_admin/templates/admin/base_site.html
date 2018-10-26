@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block branding %}
+    <h1 class="logo-wrapper">
+        <a href="{% url 'admin:index' %}" class="brand-logo darken-1" style="margin: 0; padding: 0;">
+
+            {% if site_logo.type == 'fromModel' %}
+                <img style="width: 240px; height: 64px;" src="{{ site_logo.url }}" alt="{{ site_title }}">
+            {% else %}
+                <img style="width: 240px; height: 64px;" src="{% static site_logo.url %}" alt="{{ site_title }}">
+            {% endif %}
+
+        </a>
+    </h1>
+{% endblock %}

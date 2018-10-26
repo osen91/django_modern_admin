@@ -1,0 +1,271 @@
+{% load i18n static extraTags %}
+<div id="chart-dashboard">
+    <div id="chart-1-container"></div>
+    <div id="chart-2-container"></div>
+    <div class="row">
+        <div class="col s12 m8 l8">
+            <div class="card">
+                <div class="card-move-up waves-effect waves-block waves-light">
+                    <div class="move-up cyan darken-1">
+                        <div>
+                            <span class="chart-title white-text">{{ leftChartTitle }}</span>
+                            <div class="switch chart-revenue-switch right">
+                                <label class="cyan-text text-lighten-5">
+                                    {% trans "Week" %}
+                                    <input id="chartType" {% if dashboardDateType == 'Month' %}checked{% endif %} type="checkbox">
+                                    <span class="lever"></span>
+                                    {% trans "Month" %}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="trending-line-chart-wrapper">
+                            <canvas id="trending-line-chart" height="70"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <a class="btn-floating btn-move-up waves-effect waves-light darken-2 right"><i class="mdi-content-add activator"></i></a>
+                    <div class="col s12 m3 l3">
+                        <div id="doughnut-chart-wrapper">
+                            <canvas id="doughnut-chart" height="200"></canvas>
+                            <div class="doughnut-chart-status">
+                                <p class="ultra-small center-align">{{ topLeftChartModelVerbose }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m2 l2">
+                        <ul class="doughnut-chart-legend">
+                            {% for foo in doughnutChartValues %}
+                                <style>
+                                    #doughnut{{ forloop.counter }}::before {
+                                        background: #{{ foo.doughnutColorValue }};
+                                    }
+                                </style>
+                                <li id="doughnut{{ forloop.counter }}" class="ultra-small">
+                                    <span class="legend-color"></span>{{ foo.doughnutNameField }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col s12 m5 l6">
+                        <div class="trending-bar-chart-wrapper">
+                            <canvas id="trending-bar-chart" height="90"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-reveal">
+                    <span class="card-title grey-text text-darken-4">
+                        {{ leftChartTitle }} by {{ dashboardDateType }}
+                        <i class="mdi-navigation-close right"></i></span>
+                    {% if dashboardDateType == 'Day' and topLeftChartThisWeek %}
+                        {% getChartTableByDay topLeftChartTableFields topLeftChartThisWeek dashboardDateType topLeftChartDateField %}
+                    {% elif dashboardDateType == 'Month' and topLeftChartThisYear %}
+                        {% getChartTableByMonth topLeftChartTableFields topLeftChartThisYear dashboardDateType topLeftChartDateField %}
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m4 l4">
+            <div class="card">
+                <div class="card-move-up teal waves-effect waves-block waves-light">
+                    <div class="move-up">
+                        <p class="margin white-text">{% trans "Browser Stats" %}</p>
+                        <canvas id="trending-radar-chart" height="114"></canvas>
+                    </div>
+                </div>
+                <div class="card-content  teal darken-2">
+                    <div class="line-chart-wrapper">
+                        <p class="margin white-text">{% trans "Real Time Page Views" %}</p>
+                        <canvas id="line-chart" height="114"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="card-stats">
+    <div class="row">
+        {% for miniChart in miniBarChartModel %}
+            {% getMiniBarChart miniChart forloop.counter dashboardDateType %}
+        {% endfor %}
+    </div>
+</div>
+<div id="card-widgets">
+    <div class="row">
+        <div class="col s12 m12 l4">
+            <ul id="task-card" class="collection with-header" style="overflow: scroll; height: 360px;">
+                <li class="collection-header cyan" id="taskTitle">
+                    <h4 class="task-card-title">{% trans "My Tasks" %}</h4>
+                    <p class="task-card-date">{% now "DATE_FORMAT" %}</p>
+                </li>
+                {% include 'admin/tasks.html' %}
+            </ul>
+        </div>
+        <div class="col s12 m6 l4">
+            <div id="flight-card" class="card">
+                <div class="card-content white-text" style="background: url({% static 'django_modern_admin/images/geometric.png' %}) no-repeat center center;">
+                    <div class="row">
+                        <div class="col s6 m6 l6 center-align">
+                            <div class="flight-state">
+                                <h3 class="margin thin">{% trans "Users" %}</h3>
+                                <p style="font-weight: bolder; font-size: 1.2em;">{{ request.online_now|length }}</p>
+                            </div>
+                        </div>
+                        <div class="col s6 m6 l6 center-align">
+                            <div class="flight-state">
+                                <h3 class="margin thin">{% trans "Visitors" %}</h3>
+                                <p style="font-weight: bolder; font-size: 1.2em;" id="active-users-container">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="flight-card" class="card">
+                <div class="card-content white-text" style="background: url({% static 'django_modern_admin/images/greenPolygon.png' %}) no-repeat center center;">
+                    <div class="row">
+                        <div class="col s12 m12 l12 center">
+                            <h4 class="margin thin">{% trans "Entrances By Source" %}</h4>
+                            <div class="sample-chart-wrapper">
+                                <canvas id="entrance-bar-chart" height="120"></canvas>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col s12 m6 l4">
+            <div id="profile-card" class="card">
+                <div class="card-image waves-effect waves-block waves-light">
+                    <img class="activator" src="{% static 'django_modern_admin/images/blue-bg.jpg' %}" alt="user background">
+                </div>
+                <div class="card-content">
+                    {% if request.user.adminprofile.avatar %}
+                        <img src="{{ request.user.adminprofile.avatar.url }}" alt="" class="circle responsive-img activator card-profile-image">
+                    {% else %}
+                        <img src="{% static 'django_modern_admin/images/avatar.jpg' %}" alt="" class="circle responsive-img activator card-profile-image">
+                    {% endif %}
+
+                    <a class="btn-floating activator btn-move-up waves-effect waves-light darken-2 right">
+                        <i class="mdi-editor-mode-edit"></i>
+                    </a>
+
+                    <span class="card-title activator grey-text text-darken-4">{{ request.user.get_full_name }}</span>
+                    {% if request.user.groups.all|first %}
+                        <p><i class="mdi-action-perm-identity cyan-text text-darken-2"></i> {{ request.user.groups.all|first }}</p>
+                    {% endif %}
+                    <p>
+                        <i class="mdi-action-perm-phone-msg cyan-text text-darken-2"></i>
+                        {% if request.user.adminprofile.phoneNumber %}
+                            {{ request.user.adminprofile.phoneNumber }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        <i class="mdi-communication-email cyan-text text-darken-2"></i>
+                        {% if request.user.email %}
+                            {{ request.user.email }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="card-reveal">
+                    <span class="card-title grey-text text-darken-4">{{ request.user.get_full_name }} <i class="mdi-navigation-close right"></i></span>
+                    {% if request.user.groups.all|first %}
+                        <p>
+                            <i class="mdi-action-perm-identity cyan-text text-darken-2"></i>
+                            {{ request.user.groups.all|first }}
+                        </p>
+                    {% endif %}
+                    <p>
+                        <i class="mdi-action-perm-phone-msg cyan-text text-darken-2"></i>
+                        {% if request.user.adminprofile.phoneNumber %}
+                            {{ request.user.adminprofile.phoneNumber }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        <i class="mdi-communication-email cyan-text text-darken-2"></i>
+                        {% if request.user.email %}
+                            {{ request.user.email }}
+                        {% endif %}
+                    </p>
+                    <p>
+                        <i class="mdi-social-person-add cyan-text text-darken-2"></i>
+                        {{ request.user.date_joined }}
+                    </p>
+                    <p>
+                        <i class="mdi-image-remove-red-eye cyan-text text-darken-2"></i>
+                        {{ request.user.last_login }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="work-collections">
+    <div class="row">
+        <div class="col s12 m12 l6">
+            <ul id="projects-collection" class="collection">
+                <li class="collection-item avatar">
+                    <i class="{% if model_left_icon %}{{ model_left_icon }}{% else %}mdi-editor-vertical-align-top{% endif %}
+                    circle blue-grey darken-2"></i>
+                    <span class="collection-header">{% getModelVerboseName model_left %}</span>
+                    <p>{% trans "Order By" %} {% getModelOrderByVerboseName model_left model_left_order_field %}</p>
+                </li>
+                {% if model_left %}
+                {% for record in model_left|dictsort:model_left_order_field %}
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s6">
+                                {% for fieldName in model_left_list_fields %}
+                                    {% if forloop.first %}
+                                        <p class="collections-title">{% getRecordField record fieldName %}</p>
+                                    {% else %}
+                                        <p class="collections-content">{% getRecordField record fieldName %}</p>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="col s6">
+                                <a style="float: right;" class="btn blue-grey" href="{% getUrlForRecord record %}">{% trans "Change" %}</a>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+        <div class="col s12 m12 l6">
+            <ul id="projects-collection" class="collection">
+                <li class="collection-item avatar">
+                    <i class="{% if model_right_icon %}{{ model_right_icon }}{% else %}mdi-editor-vertical-align-top{% endif %}
+                    circle red darken-2"></i>
+                    <span class="collection-header">{% getModelVerboseName model_right %}</span>
+                    <p>{% trans "Order By" %} {% getModelOrderByVerboseName model_right model_right_order_field %}</p>
+                </li>
+                {% if model_right %}
+                {% for record in model_right|dictsort:model_right_order_field %}
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s6">
+                                {% for fieldName in model_right_list_fields %}
+                                    {% if forloop.first %}
+                                        <p class="collections-title">{% getRecordField record fieldName %}</p>
+                                    {% else %}
+                                        <p class="collections-content">{% getRecordField record fieldName %}</p>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="col s6">
+                                <a style="float: right;" class="btn red" href="{% getUrlForRecord record %}">{% trans "Change" %}</a>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>

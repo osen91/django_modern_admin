@@ -1,0 +1,94 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link href="{% static 'django_modern_admin/css/page-center.css' %}" type="text/css" rel="stylesheet" media="screen,projection">
+    {{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}cyan{% endblock %}
+
+{% block mainsection %}
+    <div id="login-page" class="row">
+        <div class="col s12 z-depth-4 card-panel">
+            <form class="login-form" action="{{ app_path }}" method="post" id="login-form">
+            {% if form.errors and not form.non_field_errors %}
+                <div class="row margin">
+                    <div class="input-field col s12">
+                    <p class="center login-form-text red-text darken-3">
+                    {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+                    </p>
+                    </div>
+                </div>
+            {% endif %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="row margin">
+                        <div class="input-field col s12">
+                            <p class="center login-form-text red-text darken-3">{{ error }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if user.is_authenticated %}
+                <div class="row margin">
+                    <div class="input-field col s12">
+                    <p class="center login-form-text red-text darken-3">
+                        {% blocktrans trimmed %}
+                            You are authenticated as {{ username }}, but are not authorized to
+                            access this page. Would you like to login to a different account?
+                        {% endblocktrans %}
+                    </p>
+                    </div>
+                </div>
+            {% endif %}
+            {% csrf_token %}
+                <div class="row">
+                    <div class="input-field col s12 center">
+                        <img src="{% if adminAvatar %}{{ adminAvatar }}{% else %}{{ login_logo }}{% endif %}" alt="" class="circle responsive-img valign profile-image-login">
+                        <p class="center login-form-text">{{ site_title }}</p>
+                    </div>
+                </div>
+                <div {% if userCache %}hidden{% endif %} class="row margin">
+                    <div class="input-field col s12">
+                        <i class="mdi-social-person-outline prefix"></i>
+                        {{ form.username.errors }}
+                        {{ form.username.label_tag }} {{ form.username }}
+                    </div>
+                </div>
+                <div class="row margin">
+                    <div class="input-field col s12">
+                        <i class="mdi-action-lock-outline prefix"></i>
+                        {{ form.password.errors }}
+                        {{ form.password.label_tag }} {{ form.password }}
+                        <input type="hidden" name="next" value="{{ next }}"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                    <button class="btn waves-effect waves-light col s12" type="submit">{% trans 'Log in' %}</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 m12 l12">
+                        {% url 'admin_password_reset' as password_reset_url %}
+                        {% if password_reset_url %}
+                            <div class="password-reset-link">
+                                <a href="{{ password_reset_url }}">{% trans 'Forgotten your password or username?' %}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% if userCache %}
+    <script>
+        $(function () {
+            $('#id_username').val("{{ userCache }}");
+            setTimeout(function () {$('#id_password').focus();}, 1000);
+        })
+    </script>
+    {% endif %}
+{% endblock %}

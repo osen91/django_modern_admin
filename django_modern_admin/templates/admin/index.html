@@ -1,0 +1,503 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static extraTags %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}"/>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+    {% include 'admin/dashboard.html' %}
+{% endblock %}
+{% block footerMap %}
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
+                <h5 class="white-text">{% trans "City Based Sessions" %}</h5>
+                <p class="grey-text text-lighten-4">{% trans "You can use mouse wheel for zooming." %}</p>
+                <div id="world-map-markers"></div>
+            </div>
+            <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">{% trans "Top 10 Cities" %}</h5>
+                <p class="grey-text text-lighten-4">{% trans "This chart filled by google analytics datas." %}</p>
+                <div id="polar-chart-holder">
+                    <canvas id="polar-chart-country" width="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extrascript %}
+    <script>
+        var polarData = [];
+
+        gapi.analytics.ready(function () {
+            gapi.analytics.auth.authorize({
+                'serverAuth': {
+                    'access_token': '{{ access_token }}'
+                }
+            });
+
+            gapi.client.analytics.data.ga.get({
+                'ids': 'ga:{{ googleAnalyticsID }}',
+                'start-date': '30daysAgo',
+                'end-date': 'today',
+                'dimensions': 'ga:browser',
+                'metrics': 'ga:pageviews',
+                'sort': '-ga:pageviews',
+                'max-results': 7
+            })
+                .then(function (response) {
+                    if (response.result.totalResults > 0) {
+                        var browserLabels = [];
+                        var browserDatas = [];
+                        $.each(response.result.rows, function (key, value) {
+                            browserLabels.push(value[0]);
+                            browserDatas.push(value[1]);
+                        });
+                        var radarChartData = {
+                            labels: browserLabels,
+                            datasets: [
+                                {
+                                    label: "First dataset",
+                                    fillColor: "rgba(255,255,255,0.2)",
+                                    strokeColor: "#fff",
+                                    pointColor: "#00796b",
+                                    pointStrokeColor: "#fff",
+                                    pointHighlightFill: "#fff",
+                                    pointHighlightStroke: "#fff",
+                                    data: browserDatas
+                                }
+                            ],
+                        };
+                        trendingRadarChart = new Chart(document.getElementById("trending-radar-chart").getContext("2d")).Radar(radarChartData, {
+                            angleLineColor: "rgba(255,255,255,0.5)",
+                            pointLabelFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                            pointLabelFontColor: "#fff",
+                            pointDotRadius: 4,
+                            pointDotStrokeWidth: 2,
+                            pointLabelFontSize: 12,
+                            responsive: true
+                        });
+                    }
+                });
+
+            gapi.client.analytics.data.ga.get({
+                'ids': 'ga:{{ googleAnalyticsID }}',
+                'start-date': '30daysAgo',
+                'end-date': 'today',
+                'metrics': 'ga:sessions',
+                'sort': 'ga:sessions',
+                'dimensions': 'ga:latitude, ga:longitude, ga:city',
+            })
+                .then(function (response) {
+                    if (response.result.totalResults > 0) {
+                        var mark = [];
+                        var responseData = response.result.rows;
+                        $.each(responseData, function (key, value) {
+                            mark.push({
+                                latLng: [value[0], value[1]],
+                                name: '' + value[3] + '',
+                            });
+                            if (key <= 10) {
+                                polarData.push(
+                                    {
+                                        value: value[3],
+                                        color: "#" + ((1 << 24) * Math.random() | 0).toString(16),
+                                        highlight: "#FF5A5E",
+                                        label: "" + value[2] + ""
+                                    },
+                                );
+                            }
+                            if ((responseData.length - 1) === key) {
+                                var polarChartCountry = document.getElementById("polar-chart-country").getContext("2d");
+                                window.polarChartCountry = new Chart(polarChartCountry).PolarArea(polarData, {
+                                    segmentStrokeWidth: 1,
+                                    responsive: true
+                                });
+                            }
+                        });
+                        $('#world-map-markers').vectorMap({
+                            map: 'turkey_1_mill_en',
+                            scaleColors: ['#1fb5ac', '#1fb5ac'],
+                            markers: mark,
+                            markerStyle: {
+                                initial: {
+                                    fill: '#ff4081',
+                                    stroke: '#f8bbd0',
+                                    "fill-opacity": 1,
+                                    "stroke-width": 1,
+                                    "stroke-opacity": 1,
+                                    r: 6
+                                },
+                                hover: {
+                                    stroke: '#f8bbd0',
+                                    "stroke-width": 3,
+                                    cursor: 'pointer'
+                                },
+                                selected: {
+                                    fill: '#f50057',
+                                    "stroke-width": 0,
+                                },
+                            },
+                            backgroundColor: '#00bcd4',
+                            regionStyle: {
+                                initial: {
+                                    fill: '#b2ebf2',
+                                    'fill-opacity': 1,
+                                    stroke: 'false',
+                                    'stroke-width': 0,
+                                    'stroke-opacity': 1
+                                },
+                                hover: {
+                                    fill: '#e0f7fa',
+                                    'fill-opacity': 1,
+                                    cursor: 'pointer'
+                                },
+                                selected: {
+                                    fill: '#80deea'
+                                },
+                            }
+                        });
+                    }
+                })
+                .then(null, function (err) {
+                    console.log(err);
+                });
+            gapi.client.analytics.data.ga.get({
+                'ids': 'ga:{{ googleAnalyticsID }}',
+                'start-date': '30daysAgo',
+                'end-date': 'today',
+                'metrics': 'ga:entrances',
+                'dimensions': 'ga:source',
+            }).then(function (response) {
+                if (response.result.totalResults > 0) {
+                    var entranceLabels = [];
+                    var entranceDataSet = [];
+                    $.each(response.result.rows, function (key, value) {
+                        entranceLabels.push(value[0].split(".com")[0]);
+                        entranceDataSet.push(value[1]);
+                    });
+                    var BarChartSampleData = {
+                        labels: entranceLabels,
+                        datasets: [
+                            {
+                                label: "{% trans "Entrances By Source" %}",
+                                fillColor: "rgba(220,220,220,0.5)",
+                                strokeColor: "rgba(220,220,220,0.8)",
+                                highlightFill: "rgba(220,220,220,0.75)",
+                                highlightStroke: "rgba(220,220,220,1)",
+                                data: entranceDataSet,
+                            }
+                        ]
+                    };
+                    window.BarChartSample = new Chart(document.getElementById("entrance-bar-chart").getContext("2d")).Bar(BarChartSampleData, {
+                        responsive: true,
+                        scaleFontColor: "#ffffff"
+                    });
+                }
+            });
+
+            var pageTitles = [];
+            var pageViews = [];
+            var nReloadsPV = 0;
+
+            function getRealTimePageViews(isLoaded) {
+                gapi.client.analytics.data.realtime.get({
+                    'ids': 'ga:{{ googleAnalyticsID }}',
+                    'dimensions': 'rt:pageTitle',
+                    'metrics': 'rt:pageviews',
+                }).then(function (response) {
+                    if (response.result.totalResults > 0) {
+                        pageTitles = [];
+                        pageViews = [];
+                        $.each(response.result.rows, function (key, value) {
+                            pageTitles.push(value[0]);
+                            pageViews.push(value[1]);
+                        });
+                    }
+                    if (!isLoaded) {
+                        {#pageTitles = ['Page Name',];#}
+                        {#pageViews = [0,];#}
+                        var lineChartData = {
+                            labels: pageTitles,
+                            datasets: [
+                                {
+                                    label: "{% trans 'Real Time Page Views' %}",
+                                    fillColor: "rgba(255,255,255,0)",
+                                    strokeColor: "#fff",
+                                    pointColor: "#00796b ",
+                                    pointStrokeColor: "#fff",
+                                    pointHighlightFill: "#fff",
+                                    pointHighlightStroke: "rgba(220,220,220,1)",
+                                    data: pageViews
+                                }
+                            ]
+                        };
+                        var lineChart = document.getElementById("line-chart").getContext("2d");
+                        window.lineChart = new Chart(lineChart).Line(lineChartData, {
+                            scaleShowGridLines: false,
+                            bezierCurve: false,
+                            scaleFontSize: 12,
+                            scaleFontStyle: "normal",
+                            scaleFontColor: "#fff",
+                            responsive: true,
+                        });
+                    }
+                })
+            }
+
+
+            setInterval(function () {
+                if (pageViews.length > 0 && pageTitles.length > 0) {
+                    window.lineChart.addData([pageViews[nReloadsPV]], pageTitles[nReloadsPV]);
+                    nReloadsPV++;
+                    if (nReloadsPV === pageViews.length) {
+                        nReloadsPV = 0;
+                        if (pageViews.length !== 1) {
+                            $.each(pageTitles, function () {
+                                window.lineChart.removeData();
+                            });
+                        } else if (window.lineChart.datasets[0].points.length === 3 && pageViews.length === 1) {
+                            $.each(pageTitles, function () {
+                                window.lineChart.removeData();
+                            });
+                        }
+                    }
+                }
+                getRealTimePageViews(true);
+            }, 5000);
+
+
+            getRealTimePageViews(false);
+
+            function getRealTimeVisitors() {
+                gapi.client.analytics.data.realtime.get({
+                    'ids': 'ga:{{ googleAnalyticsID }}',
+                    'dimensions': 'rt:userType',
+                    'metrics': 'rt:activeUsers',
+                }).then(function (response) {
+                    if (response.result.totalResults > 0) {
+                        var visitorCounter = response.result.rows[0][1];
+                        $('#active-users-container').text(visitorCounter);
+                    }
+                })
+            }
+
+            getRealTimeVisitors();
+            setInterval(getRealTimeVisitors, 5000);
+        });
+    </script>
+    <script>
+        function lineChart(dataLabels, dataSetLabel1, dataSetData1, dataSetLabel2, dataSetData2) {
+            var data = {
+                labels: dataLabels,
+                datasets: [
+                    {
+                        label: dataSetLabel1,
+                        fillColor: "rgba(128, 222, 234, 0.6)",
+                        strokeColor: "#ffffff",
+                        pointColor: "#00bcd4",
+                        pointStrokeColor: "#ffffff",
+                        pointHighlightFill: "#ffffff",
+                        pointHighlightStroke: "#ffffff",
+                        data: dataSetData1
+                    },
+                    {
+                        label: dataSetLabel2,
+                        fillColor: "rgba(128, 222, 234, 0.3)",
+                        strokeColor: "#80deea",
+                        pointColor: "#00bcd4",
+                        pointStrokeColor: "#80deea",
+                        pointHighlightFill: "#80deea",
+                        pointHighlightStroke: "#80deea",
+                        data: dataSetData2
+                    }
+                ]
+            };
+            var nReloads = 0, trendingLineChart;
+
+            function update() {
+                trendingLineChart.addData([dataSetData1[nReloads], dataSetData2[nReloads]], data.labels[0]);
+                trendingLineChart.removeData();
+                nReloads++;
+                if (nReloads === 7) nReloads = 0;
+            }
+
+            setInterval(update, 3000);
+
+            var trendingLineChart = document.getElementById("trending-line-chart").getContext("2d");
+            trendingLineChart = new Chart(trendingLineChart).Line(data, {
+                scaleShowGridLines: true,///Boolean - Whether grid lines are shown across the chart
+                scaleGridLineColor: "rgba(255,255,255,0.4)",//String - Colour of the grid lines
+                scaleGridLineWidth: 1,//Number - Width of the grid lines
+                scaleShowHorizontalLines: true,//Boolean - Whether to show horizontal lines (except X axis)
+                scaleShowVerticalLines: false,//Boolean - Whether to show vertical lines (except Y axis)
+                bezierCurve: true,//Boolean - Whether the line is curved between points
+                bezierCurveTension: 0.4,//Number - Tension of the bezier curve between points
+                pointDot: true,//Boolean - Whether to show a dot for each point
+                pointDotRadius: 5,//Number - Radius of each point dot in pixels
+                pointDotStrokeWidth: 2,//Number - Pixel width of point dot stroke
+                pointHitDetectionRadius: 20,//Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+                datasetStroke: true,//Boolean - Whether to show a stroke for datasets
+                datasetStrokeWidth: 3,//Number - Pixel width of dataset stroke
+                datasetFill: true,//Boolean - Whether to fill the dataset with a colour
+                animationSteps: 60,// Number - Number of animation steps
+                animationEasing: "easeOutQuart",// String - Animation easing effect
+                tooltipTitleFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",// String - Tooltip title font declaration for the scale label
+                scaleFontSize: 12,// Number - Scale label font size in pixels
+                scaleFontStyle: "normal",// String - Scale label font weight style
+                scaleFontColor: "#fff",// String - Scale label font colour
+                tooltipEvents: ["mousemove", "touchstart", "touchmove"],// Array - Array of string names to attach tooltip events
+                tooltipFillColor: "rgba(255,255,255,0.8)",// String - Tooltip background colour
+                tooltipTitleFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",// String - Tooltip title font declaration for the scale label
+                tooltipFontSize: 12,// Number - Tooltip label font size in pixels
+                tooltipFontColor: "#000",// String - Tooltip label font colour
+                tooltipTitleFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",// String - Tooltip title font declaration for the scale label
+                tooltipTitleFontSize: 14,// Number - Tooltip title font size in pixels
+                tooltipTitleFontStyle: "bold",// String - Tooltip title font weight style
+                tooltipTitleFontColor: "#000",// String - Tooltip title font colour
+                tooltipYPadding: 8,// Number - pixel width of padding around tooltip text
+                tooltipXPadding: 16,// Number - pixel width of padding around tooltip text
+                tooltipCaretSize: 10,// Number - Size of the caret on the tooltip
+                tooltipCornerRadius: 6,// Number - Pixel radius of the tooltip border
+                tooltipXOffset: 10,// Number - Pixel offset from point x to tooltip edge
+                responsive: true
+            });
+        }
+
+        function barChart(dataLabel, dataSetLabel, dataSetData) {
+            var dataBarChart = {
+                labels: dataLabel,
+                datasets: [
+                    {
+                        label: dataSetLabel,
+                        fillColor: "#46BFBD",
+                        strokeColor: "#46BFBD",
+                        highlightFill: "rgba(70, 191, 189, 0.4)",
+                        highlightStroke: "rgba(70, 191, 189, 0.9)",
+                        data: dataSetData
+                    }
+                ]
+            };
+            var nReloads1 = 0, trendingBarChart;
+
+            function updateBarChart() {
+                trendingBarChart.addData([dataSetData[nReloads1]], dataBarChart.labels[0]);
+                trendingBarChart.removeData();
+                nReloads1++;
+                if (nReloads1 === 7) nReloads1 = 0;
+            };
+            setInterval(updateBarChart, 3000);
+
+            var trendingBarChart = document.getElementById("trending-bar-chart").getContext("2d");
+            trendingBarChart = new Chart(trendingBarChart).Bar(dataBarChart, {
+                scaleShowGridLines: false,
+                showScale: true,
+                tooltipTitleFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                responsive: true
+            });
+        }
+
+        function doughnutChart() {
+            var doughnutData = [
+                {% for foo in doughnutChartValues %}
+                    {
+                        value: {{ foo.doughnutValueField }},
+                        color: "#{{ foo.doughnutColorValue }}",
+                        highlight: "#{{ foo.doughnutColorValue }}",
+                        label: "{{ foo.doughnutNameField }}"
+                    },
+                {% endfor %}
+            ];
+
+            var doughnutChart = document.getElementById("doughnut-chart").getContext("2d");
+            myDoughnut = new Chart(doughnutChart).Doughnut(doughnutData, {
+                segmentStrokeColor: "#fff",
+                tooltipTitleFontFamily: "'Roboto','Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                percentageInnerCutout: 50,
+                animationSteps: 100,
+                segmentStrokeWidth: 4,
+                animateScale: true,
+                percentageInnerCutout: 60,
+                responsive: true
+            });
+        }
+
+        function changeDashboardDate(type) {
+            $.ajax({
+                url: "{% url 'admin:changeDashboardDate' %}",
+                method: 'POST',
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    dateType: type
+                },
+                success: function (response) {
+                    if (response.result === 'success') {
+                        setTimeout(function () {
+                            window.location.reload()
+                        }, 1000);
+                    }
+                },
+                failure: function (response) {
+
+                }
+            })
+        }
+
+        function miniBarChart(dataSet, chartID) {
+            $("#miniBarChart-" + chartID).sparkline(dataSet, {
+                type: 'bar',
+                align: 'center',
+                height: '25',
+                width: '100%',
+                {% if dashboardDateType == 'Day' %}
+                    barWidth: 10,
+                {% else %}
+                    barWidth: 20,
+                {% endif %}
+                barSpacing: 4,
+                barColor: '#C7FCC9',
+                negBarColor: '#81d4fa',
+                zeroColor: '#81d4fa',
+                //tooltipFormat: $.spformat('{{value}}', 'tooltip-class')
+            });
+        }
+
+
+        $(function () {
+            {% if dashboardDateType == 'Day' %}
+                var dataLabel1 = "{% trans 'This Week' %}";
+                var topLeftData1 = {% getChartValues topLeftChartThisWeekValues dashboardDateType %};
+                var dataLabel2 = "{% trans 'Last Week' %}";
+                var topLeftData2 = {% getChartValues topLeftChartLastWeekValues dashboardDateType %};
+                lineChart({% getDayShortName %}, dataLabel1, topLeftData1, dataLabel2, topLeftData2);
+                barChart({% getDayShortName %}, dataLabel1, topLeftData1);
+            {% else %}
+                var dataLabel1 = "{% trans 'This Year' %}";
+                var topLeftData1 = {% getChartValues topLeftChartThisYearValues dashboardDateType %};
+                var dataLabel2 = "{% trans 'Last Year' %}";
+                var topLeftData2 = {% getChartValues topLeftChartLastLastValues dashboardDateType %};
+                lineChart({% getMonthShortName %}, dataLabel1, topLeftData1, dataLabel2, topLeftData2);
+                barChart({% getMonthShortName %}, dataLabel1, topLeftData1);
+            {% endif %}
+            {% for miniChart in miniBarChartModel %}
+                miniBarChart({% getMiniChartDatas miniChart %}, {{ forloop.counter }});
+            {% endfor %}
+            doughnutChart();
+            $("#chartType").on('change', function () {
+                if ($(this).is(':checked')) {
+                    changeDashboardDate('Month');
+                } else {
+                    changeDashboardDate('Day')
+                }
+            });
+        });
+    </script>
+{% endblock %}

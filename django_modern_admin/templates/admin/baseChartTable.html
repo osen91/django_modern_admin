@@ -1,0 +1,36 @@
+{% load extraTags %}
+<table class="responsive-table">
+    <thead>
+    <tr>
+        <th data-field="{{ dateType }}">{{ dateType }}</th>
+        {% for tableHeader in verboseNames %}
+            <th data-field="{{ tableHeader }}">{{ tableHeader }}</th>
+            {% if forloop.last %}
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    {% for tableValue in tableValues %}
+                        <td>{{ tableValue.dateField }}</td>
+                        {% if tableValue.tableValue %}
+                            {% for tableField in tableValue.tableValue  %}
+                                <td>{{ tableField }}</td>
+                                {% if forloop.last %}
+                                    </tr><tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {% for verbose in verboseNames %}
+                                {% if not forloop.last %}
+                                <td></td>
+                                {% else %}
+                                </tr><tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+                    {% endfor %}
+                </tbody>
+            {% endif %}
+        {% endfor %}
+</table>

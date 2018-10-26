@@ -1,0 +1,28 @@
+{% load i18n %}
+<div class="col s12 m6 l3">
+    <div class="card">
+        <div class="card-content {{ color }} white-text">
+            <p class="card-stats-title">
+                <i class="{{ chartIcon }}"></i>
+                {{ verboseName }}
+            </p>
+            <h4 class="card-stats-number">
+                {{ lastValue }}
+            </h4>
+            <p class="card-stats-compare">
+                <i class="{{ arrowIcon }}"></i>
+                {{ result }}%
+                <span class="{{ color }}-text text-lighten-5">
+                    {% if dateType == 'Day' %}
+                        {% trans "from yesterday" %}
+                    {% else %}
+                        {% trans "from last month" %}
+                    {% endif %}
+                </span>
+            </p>
+        </div>
+        <div class="card-action {{ color }} darken-2">
+            <div id="miniBarChart-{{ loopCounter }}"></div>
+        </div>
+    </div>
+</div>

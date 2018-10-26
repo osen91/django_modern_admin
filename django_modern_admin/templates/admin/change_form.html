@@ -1,0 +1,137 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+    {{ media }}
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block breadcrumbs_content %}
+    <h5 class="breadcrumbs-title">{% if title %} &rsaquo; {{ title|upper }}{% endif %}</h5>
+    <ol class="breadcrumb">
+        <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+        <li><a>{{ opts.app_config.verbose_name }}</a></li>
+        <li>
+            {% if has_change_permission %}
+                <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+                {% else %}{{ opts.verbose_name_plural|capfirst }}
+            {% endif %}
+        </li>
+        <li>
+            {% if add %}{% blocktrans with name=opts.verbose_name %}Add {{ name }}{% endblocktrans %}
+                {% else %}{{ original|truncatewords:"18" }}
+            {% endif %}
+        </li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main" class="row">
+        <div class="col s12 l12 m12">
+            {% block object-tools %}
+                {% if change %}{% if not is_popup %}
+                    <div class="right">
+                        <ul class="object-tools">
+                            {% block object-tools-items %}
+                                <li>
+                                    {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+                                    <a href="{% add_preserved_filters history_url %}" class="waves-effect waves-light btn blue">{% trans "History" %}</a>
+                                </li>
+                                {% if has_absolute_url %}
+                                    <li>
+                                        <a href="{{ absolute_url }}" class="waves-effect waves-light btn green">{% trans "View on site" %}</a>
+                                    </li>
+                                {% endif %}
+                            {% endblock %}
+                        </ul>
+                    </div>
+                {% endif %}{% endif %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="card-panel">
+    {% if is_popup %}
+        <script>
+            $(function () {
+                $('#popup_save').click(function (e) {
+                    var form = $('#{{ opts.model_name }}_form');
+                    var url = form.attr('action');
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function (response) {
+                            if (response == 'success') {
+                                Materialize.toast("{% trans 'Successfully saved.' %}", 5000);
+                                document.getElementById("addOrChangeSideNav").style.width = "0";
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                Materialize.toast("{% trans 'Please correct the error below.' %}", 5000);
+                                $('#addOrChangeSideNav').html('').html(response).find('form').attr('action', url);
+                            }
+                        }
+                    });
+                    e.preventDefault();
+                })
+            })
+        </script>
+    {% endif %}
+        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+            {% csrf_token %}{% block form_top %}{% endblock %}
+            <div>
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1"/>{% endif %}
+                {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}"/>{% endif %}
+                {% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+                {% if errors %}
+                    <p class="errornote">
+                        {% if errors|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+                    </p>
+                    {{ adminform.form.non_field_errors }}
+                {% endif %}
+
+                {% block field_sets %}
+                    {% for fieldset in adminform %}
+                        {% include "admin/includes/fieldset.html" %}
+                    {% endfor %}
+                {% endblock %}
+
+                {% block after_field_sets %}{% endblock %}
+
+                {% block inline_field_sets %}
+                    <ul class="collapsible collapsible-accordion" data-collapsible="expandable">
+                        {% for inline_admin_formset in inline_admin_formsets %}
+                            <li>
+                                {% include inline_admin_formset.opts.template %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endblock %}
+
+                {% block after_related_objects %}{% endblock %}
+
+                {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+                {% block admin_change_form_document_ready %}
+                    <script type="text/javascript"
+                            id="django-admin-form-add-constants"
+                            src="{% static 'admin/js/change_form.js' %}"
+                            {% if adminform and add %}
+                            data-model-name="{{ opts.model_name }}"
+                            {% endif %}>
+                    </script>
+                {% endblock %}
+                {% prepopulated_fields_js %}
+            </div>
+        </form>
+    </div>
+{% endblock %}

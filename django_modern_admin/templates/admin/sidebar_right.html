@@ -1,0 +1,37 @@
+{% load i18n log %}
+<aside id="right-sidebar-nav">
+    <ul id="chat-out" class="side-nav rightside-navigation" style="min-height: 100vh;">
+        <li class="li-hover">
+            <ul class="chat-collapsible" data-collapsible="expandable">
+                <li>
+                    <div class="collapsible-header teal white-text active"><i class="mdi-social-whatshot"></i>{% trans "Recent Activity" %}</div>
+                    <div class="collapsible-body recent-activity">
+                        {% get_admin_log 15 as admin_log for_user user %}
+                        {% if not admin_log %}
+                        <p>{% trans 'None available' %}</p>
+                        {% else %}
+                            {% for entry in admin_log %}
+                                <div class="recent-activity-list chat-out-list row">
+                                <div class="col s3 recent-activity-list-icon">
+                                    <i class="{% if entry.is_deletion %}mdi-action-delete red-text
+                                                {% elif entry.is_change %}mdi-editor-border-color orange-text
+                                                {% elif entry.is_addition %}mdi-content-send green-text{% endif %}"></i>
+                                </div>
+                                <div class="col s9 recent-activity-list-text">
+                                    {% if entry.is_deletion or not entry.get_admin_url %}
+                                        {{ entry.object_repr }}
+                                    {% else %}
+                                        <a href="{{ entry.get_admin_url }}">
+                                            {{ entry.object_repr }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</aside>

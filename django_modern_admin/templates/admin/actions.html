@@ -1,0 +1,28 @@
+{% load i18n %}
+
+<div class="row">
+    <div class="col s8 m8 l8">
+        {% for field in action_form %}{% if field.label %}<label>{{ field.label }} {% endif %}{{ field }}{% if field.label %}</label>{% endif %}{% endfor %}
+    </div>
+    <div class="col s4 m4 l4">
+        <button type="submit" class="waves-effect waves-light btn-large" title="{% trans "Run the selected action" %}" name="index" value="{{ action_index|default:0 }}">
+            <i class="mdi-content-send left"></i>
+            {% trans "Go" %}
+        </button>
+        {#            {% if actions_selection_counter %}#}
+        {#                <span class="question">#}
+        {#                <a class="waves-effect waves-light btn" href="#" title="{% trans "Click here to select the objects across all pages" %}">#}
+        {#                    {% blocktrans with cl.result_count as total_count %}Select all {{ total_count }} {{ module_name }}{% endblocktrans %}#}
+        {#                </a>#}
+        {#            </span>#}
+        {#                <span class="clear"><a class="waves-effect waves-light btn" href="#">{% trans "Clear selection" %}</a></span>#}
+        {#                <br>#}
+        {#            <h6 class="card-header center">#}
+        {#                <span class="action-counter" data-actions-icnt="{{ cl.result_list|length }}">{{ selection_note }}</span>#}
+        {#                {% if cl.result_count != cl.result_list|length %}#}
+        {#                    <span class="all">{{ selection_note_all }}</span> <br>#}
+        {#                {% endif %}#}
+        {#            </h6>#}
+        {#            {% endif %}#}
+    </div>
+</div>

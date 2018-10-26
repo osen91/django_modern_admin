@@ -1,0 +1,35 @@
+{% for foo in tasks %}
+    <li class="collection-item dismissable taskLiItem">
+        <input type="checkbox" class="taskCheckboxClass" data-task-id="{{ foo.id }}" id="task-{{ foo.id }}"/>
+        <label for="task-{{ foo.id }}">{{ foo.name }} <a class="secondary-content"><span class="ultra-small">{{ foo.date }}</span></a>
+        </label>
+    </li>
+{% endfor %}
+<script>
+    $(function () {
+        $('.taskCheckboxClass').change(function () {
+            if ($(this).is(":checked")) {
+                $(this).parent("li").css("text-decoration", "line-through");
+                $.ajax({
+                    url: "{% url 'admin:completeTask' %}",
+                    method: 'post',
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: $(this).attr("data-task-id"),
+                        isDone: 1
+                    },
+                    success: function (response) {
+
+                        setTimeout(function () {
+                            $('.taskLiItem').remove();
+                            $('#taskTitle').after(response);
+                        }, 2000);
+                    },
+                    failure: function (response) {
+
+                    }
+                })
+            }
+        });
+    });
+</script>
