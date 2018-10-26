@@ -24,7 +24,6 @@ Quick start
 		‘django.contrib.admin’,
 		‘... ‘
 	    ]
-    	```
 	
 2. Requirements: Pillow, oauth2client
 
